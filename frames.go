@@ -34,6 +34,16 @@ type Frame interface {
 //  +----------------------------------+
 type HeaderWord uint32
 
+func NewHeaderWord(control bool, version SpdyVersion, typ FrameType) HeaderWord {
+	var header HeaderWord
+	if control {
+		header |= 0x80000000
+	}
+	// header |= version << 4
+	// header |= typ
+	return header
+}
+
 // Control bit: The 'C' bit is a single bit indicating if this is a control
 // message. For control frames this value is always 1.
 func (h HeaderWord) Control() bool {
@@ -42,14 +52,18 @@ func (h HeaderWord) Control() bool {
 
 // Version: The version number of the SPDY protocol. This document describes
 // SPDY version 3.
-func (h HeaderWord) Version() int {
-	return int((h >> 16) & 0x7F)
+func (h HeaderWord) Version() uint16 {
+	return uint16((h >> 16) & 0x7F)
 }
 
 // Type: The type of control frame. See Control Frames (Section 2.6) for the
 // complete list of control frames.
 func (h HeaderWord) Type() FrameType {
 	return FrameType(h & 0xFFFF)
+}
+
+func (h HeaderWord) Write(w io.Writer) (int, error) {
+	return w.Write([]byte{})
 }
 
 // ----------------------------------------------------------------------------

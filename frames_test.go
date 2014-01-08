@@ -14,11 +14,15 @@ var _ = spec.Suite("Header Word", func(c *spec.C) {
 		})
 
 		c.It("should know its version", func(c *spec.C) {
-			c.Assert(header.Version()).Equals(3)
+			c.Assert(header.Version()).Equals(uint16(Spdy3))
 		})
 
 		c.It("should know its type", func(c *spec.C) {
 			c.Assert(header.Type()).Equals(SynReplyType)
+		})
+
+		c.It("should write its control bit", func(c *spec.C) {
+			c.Skip("pending")
 		})
 	})
 
