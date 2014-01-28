@@ -36,11 +36,13 @@ type HeaderWord uint32
 
 func NewHeaderWord(control bool, version SpdyVersion, typ FrameType) HeaderWord {
 	var header HeaderWord
+
 	if control {
 		header |= 0x80000000
 	}
-	// header |= version << 4
-	// header |= typ
+
+	header |= HeaderWord(uint32(version&0x7f) << 16)
+	header |= HeaderWord(uint32(typ) & 0xff)
 	return header
 }
 
@@ -63,7 +65,7 @@ func (h HeaderWord) Type() FrameType {
 }
 
 func (h HeaderWord) Write(w io.Writer) (int, error) {
-	return w.Write([]byte{})
+	return writeWord(w, uint32(h))
 }
 
 // ----------------------------------------------------------------------------
@@ -74,12 +76,23 @@ func (h HeaderWord) Write(w io.Writer) (int, error) {
 
 type FlagLenWord uint32
 
+func NewFlagLenWord(flags uint8, length uint32) FlagLenWord {
+	var flagLenWord FlagLenWord
+	flagLenWord |= FlagLenWord(flags << 24)
+	flagLenWord |= FlagLenWord(length & 0x00ffffff)
+	return flagLenWord
+}
+
 func (f FlagLenWord) Flags() uint8 {
 	return uint8(f >> 24)
 }
 
 func (f FlagLenWord) Length() uint32 {
 	return uint32(f & 0x00FFFFFF)
+}
+
+func (f FlagLenWord) Write(w io.Writer) (int, error) {
+	return writeWord(w, uint32(f))
 }
 
 // ----------------------------------------------------------------------------
@@ -98,6 +111,10 @@ func (s *StreamIdWord) Read(r io.Reader) (int, error) {
 
 func (s StreamIdWord) StreamId() uint32 {
 	return uint32(s & 0x7FFFFFFF)
+}
+
+func (s StreamIdWord) Write(w io.Writer) (int, error) {
+	return writeWord(w, uint32(s))
 }
 
 // ----------------------------------------------------------------------------
@@ -119,6 +136,10 @@ func (p *PriorityWord) Read(r io.Reader) (int, error) {
 
 func (p PriorityWord) Priority() uint8 {
 	return uint8(p >> 29)
+}
+
+func (p PriorityWord) Write(w io.Writer) (int, error) {
+	return writeWord(w, uint32(p))
 }
 
 // ----------------------------------------------------------------------------
@@ -655,3 +676,15 @@ func (w *WindowUpdate) Read(r io.Reader) (n int, err error) {
 
 // Ensure Headers is a frame
 var _ Frame = &WindowUpdate{}
+
+// ----------------------------------------------------------------------------
+// Helper functions
+
+func writeWord(w io.Writer, word uint32) (int, error) {
+	return w.Write([]byte{
+		byte(word & 0xff000000 >> 24),
+		byte(word & 0x00ff0000 >> 16),
+		byte(word & 0x0000ff00 >> 8),
+		byte(word & 0x000000ff),
+	})
+}
