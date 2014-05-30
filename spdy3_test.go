@@ -1,24 +1,13 @@
 package spdy3
 
 import (
-	"github.com/markchadwick/spec"
 	"testing"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
 func Test(t *testing.T) {
-	spec.Run(t)
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "spdy3 suite")
 }
-
-/*
-type RWBuffer struct {
-	buf bytes.Buffer
-}
-
-func (rw *RWBuffer) Read(p []byte) (n int, err error) {
-	return 0, io.EOF
-}
-
-func (rw *RWBuffer) Write(p []byte) (n int, err error) {
-	return 0, io.EOF
-}
-*/

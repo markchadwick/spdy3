@@ -2,20 +2,22 @@ package spdy3
 
 import (
 	"bytes"
-	"github.com/markchadwick/spec"
 	"io"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
-var _ = spec.Suite("Framer", func(c *spec.C) {
+var _ = Describe("Framer", func() {
 	rw := new(bytes.Buffer)
 	framer := NewFramer(Spdy3, rw)
 
-	c.It("Should EOF when there are no more frames", func(c *spec.C) {
+	Describe("Should EOF when there are no more frames", func() {
 		_, err := framer.Read()
-		c.Assert(err).Equals(io.EOF)
+		Expect(err).To(Equal(io.EOF))
 	})
 
-	c.It("Should read a simple frame", func(c *spec.C) {
+	Describe("Should read a simple frame", func() {
 		NewHeaderWord(true, Spdy3, SynStreamType).Write(rw)
 		NewFlagLenWord(0, 0).Write(rw)
 		StreamIdWord(666).Write(rw)
@@ -23,10 +25,6 @@ var _ = spec.Suite("Framer", func(c *spec.C) {
 		PriorityWord(0).Write(rw)
 
 		_, err := framer.Read()
-		c.Assert(err).IsNil()
-		// c.Assert(frame).NotNil()
-	})
-
-	c.It("Should read two frames", func(c *spec.C) {
+		Expect(err).To(BeNil())
 	})
 })

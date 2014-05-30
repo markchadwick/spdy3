@@ -23,6 +23,12 @@ const (
 	CredentialType
 )
 
+type SpdyVersion uint16
+
+const (
+	Spdy3 SpdyVersion = 3
+)
+
 type Frame interface {
 	Type() FrameType
 }
@@ -54,8 +60,8 @@ func (h HeaderWord) Control() bool {
 
 // Version: The version number of the SPDY protocol. This document describes
 // SPDY version 3.
-func (h HeaderWord) Version() uint16 {
-	return uint16((h >> 16) & 0x7F)
+func (h HeaderWord) Version() SpdyVersion /* TODO uint16 */ {
+	return SpdyVersion((h >> 16) & 0x7F)
 }
 
 // Type: The type of control frame. See Control Frames (Section 2.6) for the
